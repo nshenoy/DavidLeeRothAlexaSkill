@@ -69,10 +69,11 @@ namespace DavidLeeRothAlexaSkill.Controllers
 
             switch (request.Request.Type)
             {
-                case "LaunchRequest":
-                    break;
                 case "IntentRequest":
                     response = this.IntentRequestHandler(request);
+                    break;
+                case "LaunchRequest":
+                    response = this.LaunchRequestHandler(request);
                     break;
                 case "SessionEndedRequest":
                     response = this.SessionEndedRequestHandler(request);
