@@ -1,0 +1,13 @@
+﻿SayIntent say something
+SayIntent give me something
+SayIntent sing
+SayIntent hit me
+SayIntent scream
+SayIntent give me a scream
+SayIntent belt out something
+SayIntent belt something out
+SayIntent melt my face
+
+AMAZON.HelpIntent help
+AMAZON.HelpIntent what can you do
+
