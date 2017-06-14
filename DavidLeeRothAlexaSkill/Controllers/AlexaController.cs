@@ -120,11 +120,8 @@ namespace DavidLeeRothAlexaSkill.Controllers
 
         private AlexaResponse LaunchRequestHandler(AlexaRequest request)
         {
-            var response = new AlexaResponse("Welcome to Hair Band. Tell me to melt your face.");
-            response.Session.MemberId = request.Session.Attributes.MemberId;
+            var response = new AlexaResponse("Welcome to Hair Band. You can tell me to melt your face.");
             response.Response.Card.Content = "Awwwww yeah!";
-            response.Response.Reprompt.OutputSpeech.Text = "Please tell me to say something.";
-            response.Response.ShouldEndSession = false;
 
             return response;
         }
