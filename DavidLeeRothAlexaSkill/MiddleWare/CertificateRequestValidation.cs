@@ -86,9 +86,9 @@ namespace DavidLeeRothAlexaSkill.MiddleWare
                     throw new CertificateException(err);
                 }
 
-                if (!x509cert.Subject.Contains("CN=echo-api.amazon.com") || !x509cert.Issuer.Contains("CN=VeriSign Class 3 Secure Server CA"))
+                if (!x509cert.Subject.Contains("CN=echo-api.amazon.com"))
                 {
-                    string err = "Certificate subject and issuer incorrect";
+                    string err = $"Certificate subject '{x509cert.Subject}' incorrect. (IssuerName: '{x509cert.IssuerName.Name}')";
                     throw new CertificateException(err);
                 }
 
