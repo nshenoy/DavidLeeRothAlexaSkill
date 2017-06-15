@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography.X509Certificates;
@@ -32,7 +32,7 @@ namespace DavidLeeRothAlexaSkill.MiddleWare
             catch (CertificateException ce)
             {
                 this.logger.LogError(ce.Message, ce);
-                context.Response.StatusCode = 403;
+                context.Response.StatusCode = 400;
                 await context.Response.WriteAsync(ce.Message);
             }
             catch (Exception e)
