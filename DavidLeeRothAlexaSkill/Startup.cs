@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using DavidLeeRothAlexaSkill.Configuration;
+using DavidLeeRothAlexaSkill.MiddleWare;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -56,6 +57,7 @@ namespace DavidLeeRothAlexaSkill
                 RequestPath = new PathString("/Sounds")
             });
 
+            app.UseMiddleware<CertificateRequestValidation>();
             app.UseMvc();
         }
     }
