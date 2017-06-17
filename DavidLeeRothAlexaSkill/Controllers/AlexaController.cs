@@ -95,6 +95,11 @@ namespace DavidLeeRothAlexaSkill.Controllers
                 case "AMAZON.HelpIntent":
                     response = this.HelpIntentHandler(request);
                     break;
+                case "AMAZON.StopIntent":
+                case "AMAZON.CancelIntent":
+                    response = new AlexaResponse("");
+                    response.Response.ShouldEndSession = true;
+                    break;
             }
 
             return response;
@@ -102,7 +107,12 @@ namespace DavidLeeRothAlexaSkill.Controllers
 
         private AlexaResponse HelpIntentHandler(AlexaRequest request)
         {
-            return new AlexaResponse("Ask David Lee Roth to melt your face");
+            var response = new AlexaResponse("The Hair Band skill is here to melt your face. Try asking it to melt your face, to sing, or to say something. What would you like to do?");
+            response.Response.Card.Content = "Awwwww yeah!";
+            response.Response.Reprompt.OutputSpeech.Text = "What would you like me to do?";
+            response.Response.ShouldEndSession = false;
+
+            return response;
         }
 
         private AlexaResponse SayIntentHandler(AlexaRequest request)
