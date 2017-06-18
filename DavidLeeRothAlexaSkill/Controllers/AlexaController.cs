@@ -53,7 +53,7 @@ namespace DavidLeeRothAlexaSkill.Controllers
             }
 
             var totalSeconds = (DateTime.UtcNow - request.Request.Timestamp).TotalSeconds;
-            if(totalSeconds > 150)
+            if(totalSeconds <= 0 || totalSeconds > 150)
             {
                 return BadRequest();
             }
