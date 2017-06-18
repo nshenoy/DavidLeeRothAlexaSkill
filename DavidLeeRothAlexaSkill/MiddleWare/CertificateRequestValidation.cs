@@ -140,12 +140,14 @@ namespace DavidLeeRothAlexaSkill.MiddleWare
                         string err = "Certificate public key is null";
                         throw new CertificateException(err);
                     }
-                    
+
+                    this.logger.LogInformation("Verifying hash...");
                     if(!rsa.VerifyHash(data, CryptoConfig.MapNameToOID("SHA1"), signature))
                     {
-                        string err = $"Asserted hash value from `Signature` header does not match derived hash value from the request body";
+                        string err = "Asserted hash value from `Signature` header does not match derived hash value from the request body";
                         throw new CertificateException(err);
                     }
+                    this.logger.LogInformation("Done validating certificate!");
                 }
 
             }
