@@ -122,6 +122,9 @@ namespace DavidLeeRothAlexaSkill.MiddleWare
                 this.logger.LogInformation("Attempting to validate Signature hash...");
 
                 var signatureHeaderValue = headers["Signature"].First();
+
+                this.logger.LogInformation($"Signature value: {signatureHeaderValue}");
+
                 var signature = Convert.FromBase64String(signatureHeaderValue);
                 using(var reader = new StreamReader(context.Request.Body, Encoding.UTF8, true, 1024))
                 using (var sha1 = new SHA1Managed())
