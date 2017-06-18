@@ -9,11 +9,6 @@ namespace DavidLeeRothAlexaSkill.Controllers
 {
     public class DavidLeeRothController : Controller
     {
-        private static string[] RothResponsePrefixes = {
-            "Dave says ",
-            " "
-        };
-
         private static string[] RothResponses = {
             "bopx.mp3",
             "bosdibodiboppx.mp3",
