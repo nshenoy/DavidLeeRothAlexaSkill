@@ -31,7 +31,9 @@ namespace DavidLeeRothAlexaSkill.MiddleWare
             try
             {
                 await this.VerifyCertificate(context);
+                this.logger.LogInformation("Calling requestDelegate.Invoke...");
                 await this.requestDelegate.Invoke(context);
+                this.logger.LogInformation("Complete middleware.");
             }
             catch (CertificateException ce)
             {
