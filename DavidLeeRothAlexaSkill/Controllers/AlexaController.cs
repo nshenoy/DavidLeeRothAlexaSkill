@@ -19,14 +19,6 @@ namespace DavidLeeRothAlexaSkill.Controllers
         };
 
         private static Random GlobalRandom = new Random(Guid.NewGuid().GetHashCode());
-        private string randomRothResponsePrefix
-        {
-            get
-            {
-                var rand = new Random(DavidLeeRothController.GlobalRandom.Next());
-                return DavidLeeRothController.RothResponsePrefixes[rand.Next(0, DavidLeeRothController.RothResponsePrefixes.Length - 1)];
-            }
-        }
 
         private string randomRothResponse
         {
