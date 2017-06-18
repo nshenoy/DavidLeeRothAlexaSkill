@@ -52,6 +52,12 @@ namespace DavidLeeRothAlexaSkill.Controllers
                 return BadRequest();
             }
 
+            var totalSeconds = (DateTime.UtcNow - request.Request.Timestamp).TotalSeconds;
+            if(totalSeconds > 150)
+            {
+                return BadRequest();
+            }
+
             AlexaResponse response = null;
 
             switch (request.Request.Type)

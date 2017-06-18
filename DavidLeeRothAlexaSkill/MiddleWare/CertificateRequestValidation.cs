@@ -1,10 +1,14 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Threading.Tasks;
 using DavidLeeRothAlexaSkill.Exceptions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.Extensions.Logging;
 
 namespace DavidLeeRothAlexaSkill.MiddleWare
@@ -22,11 +26,11 @@ namespace DavidLeeRothAlexaSkill.MiddleWare
 
         public async Task Invoke(HttpContext context)
         {
-            var headers = context.Request.Headers;
+            context.Request.EnableRewind();
 
             try
             {
-                await this.VerifyCertificate(headers);
+                await this.VerifyCertificate(context);
                 await this.requestDelegate.Invoke(context);
             }
             catch (CertificateException ce)
@@ -38,13 +42,16 @@ namespace DavidLeeRothAlexaSkill.MiddleWare
             catch (Exception e)
             {
                 this.logger.LogError(e.Message, e);
+                context.Response.StatusCode = 400;
                 throw;
             }
         }
 
-        private async Task VerifyCertificate(IHeaderDictionary headers)
+        private async Task VerifyCertificate(HttpContext context)
         {
-            if(headers.Keys.Contains("X-IAINTGOTNOBODY"))
+            var headers = context.Request.Headers;
+
+            if (headers.Keys.Contains("X-IAINTGOTNOBODY"))
             {
                 return;
             }
@@ -69,7 +76,7 @@ namespace DavidLeeRothAlexaSkill.MiddleWare
                 && certUrl.Host.Equals("s3.amazonaws.com", StringComparison.OrdinalIgnoreCase)
                 && certUrl.AbsolutePath.StartsWith("/echo.api/")))
             {
-                string err = "`SignatureCertChainUrl` is invalid";
+                string err = $"`SignatureCertChainUrl` is invalid [{signatureCertChainUrl}]";
                 throw new CertificateException(err);
             }
 
@@ -109,6 +116,30 @@ namespace DavidLeeRothAlexaSkill.MiddleWare
                     string err = "Certificate chain is not valid";
                     throw new CertificateException(err);
                 }
+
+                var signatureHeaderValue = headers["Signature"].First();
+                var signature = Convert.FromBase64String(signatureHeaderValue);
+                using(var reader = new StreamReader(context.Request.Body, Encoding.UTF8, true, 1024))
+                using (var sha1 = new SHA1Managed())
+                {
+                    var body = await reader.ReadToEndAsync();
+                    var data = sha1.ComputeHash(Encoding.UTF8.GetBytes(body));
+
+                    var rsa = (RSACryptoServiceProvider)x509cert.PublicKey.Key;
+
+                    if(rsa == null)
+                    {
+                        string err = "Certificate public key is null";
+                        throw new CertificateException(err);
+                    }
+                    
+                    if(!rsa.VerifyHash(data, CryptoConfig.MapNameToOID("SHA1"), signature))
+                    {
+                        string err = $"Asserted hash value from `Signature` header does not match derived hash value from the request body";
+                        throw new CertificateException(err);
+                    }
+                }
+
             }
         }
     }
