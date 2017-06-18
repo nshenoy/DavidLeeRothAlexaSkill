@@ -53,6 +53,7 @@ namespace DavidLeeRothAlexaSkill.MiddleWare
 
             if (headers.Keys.Contains("X-IAINTGOTNOBODY"))
             {
+                this.logger.LogInformation("X-IAINTGOTNOBODY header found. Skipping certificate validation.");
                 return;
             }
 
@@ -62,7 +63,7 @@ namespace DavidLeeRothAlexaSkill.MiddleWare
                 throw new CertificateException(err);
             }
 
-            var signatureCertChainUrl = headers["SignatureCertChainUrl"].First().Replace("/../", "/");
+            var signatureCertChainUrl = headers["SignatureCertChainUrl"].FirstOrDefault()?.Replace("/../", "/");
 
             if (string.IsNullOrWhiteSpace(signatureCertChainUrl))
             {
@@ -82,6 +83,7 @@ namespace DavidLeeRothAlexaSkill.MiddleWare
 
             using (var client = new HttpClient())
             {
+                this.logger.LogInformation($"Attempting to download cert from {certUrl}...");
                 var cert = await client.GetByteArrayAsync(certUrl);
                 var x509cert = new X509Certificate2(cert);
                 var effectiveDate = DateTime.MinValue;
@@ -116,6 +118,8 @@ namespace DavidLeeRothAlexaSkill.MiddleWare
                     string err = "Certificate chain is not valid";
                     throw new CertificateException(err);
                 }
+
+                this.logger.LogInformation("Attempting to validate Signature hash...");
 
                 var signatureHeaderValue = headers["Signature"].First();
                 var signature = Convert.FromBase64String(signatureHeaderValue);
