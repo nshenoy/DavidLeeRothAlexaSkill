@@ -130,6 +130,7 @@ namespace DavidLeeRothAlexaSkill.MiddleWare
                 using (var sha1 = new SHA1Managed())
                 {
                     var body = await reader.ReadToEndAsync();
+                    this.logger.LogInformation($"Body: {body}");
                     var data = sha1.ComputeHash(Encoding.UTF8.GetBytes(body));
 
                     var rsa = (RSACryptoServiceProvider)x509cert.PublicKey.Key;
