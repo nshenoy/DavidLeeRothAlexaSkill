@@ -30,10 +30,12 @@ namespace DavidLeeRothAlexaSkill.Controllers
         }
 
         private AlexaSkillConfiguration alexaSkillConfiguration;
+        private readonly ILogger logger;
 
-        public DavidLeeRothController(IOptions<AlexaSkillConfiguration> alexaSkillConfiguration)
+        public DavidLeeRothController(IOptions<AlexaSkillConfiguration> alexaSkillConfiguration, ILoggerFactory loggerFactory)
         {
             this.alexaSkillConfiguration = alexaSkillConfiguration.Value;
+            this.logger = loggerFactory.CreateLogger("ControllerLogger");
         }
 
         [Route("api/alexa")]
