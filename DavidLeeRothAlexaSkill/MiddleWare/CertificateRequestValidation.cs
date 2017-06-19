@@ -133,7 +133,7 @@ namespace DavidLeeRothAlexaSkill.MiddleWare
                 this.logger.LogInformation($"Signature value: {signatureHeaderValue}");
 
                 var signature = Convert.FromBase64String(signatureHeaderValue);
-                using(var reader = new StreamReader(context.Request.Body, Encoding.UTF8, true, 1024))
+                using(var reader = new StreamReader(context.Request.Body, Encoding.UTF8, true, 1024, leaveOpen:true))
                 using (var sha1 = new SHA1Managed())
                 {
                     var body = await reader.ReadToEndAsync();
