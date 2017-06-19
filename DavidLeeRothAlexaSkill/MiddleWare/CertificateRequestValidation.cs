@@ -30,15 +30,18 @@ namespace DavidLeeRothAlexaSkill.MiddleWare
 
             try
             {
+                await this.next.Invoke(context);
+
+                this.logger.LogInformation("Verifying certificate...");
                 await this.VerifyCertificate(context);
-                this.logger.LogInformation("Calling requestDelegate.Invoke...");
-                await this.next(context);
+                this.logger.LogInformation("DONE Verifying certificate.");
             }
             catch (CertificateException ce)
             {
                 this.logger.LogError(ce.Message, ce);
                 context.Response.StatusCode = 400;
                 await context.Response.WriteAsync(ce.Message);
+                return;
             }
             catch (Exception e)
             {
