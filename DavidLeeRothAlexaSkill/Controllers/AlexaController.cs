@@ -10,6 +10,7 @@ using AlexaSkill.Data;
 using DavidLeeRothAlexaSkill.Configuration;
 using DavidLeeRothAlexaSkill.Exceptions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -60,7 +61,10 @@ namespace DavidLeeRothAlexaSkill.Controllers
         {
             try
             {
+                this.HttpContext.Request.EnableRewind();
+                var initialBody = this.HttpContext.Request.Body;
                 await this.VerifyCertificate(this.HttpContext);
+                this.HttpContext.Request.Body = initialBody;
             }
             catch (CertificateException ce)
             {
@@ -242,6 +246,8 @@ namespace DavidLeeRothAlexaSkill.Controllers
                 using (var sha1 = new SHA1Managed())
                 {
                     var body = await reader.ReadToEndAsync();
+                    context.Request.Body.Position = 0;
+
                     this.logger.LogInformation($"Body: {body}");
                     var data = sha1.ComputeHash(Encoding.UTF8.GetBytes(body));
 
