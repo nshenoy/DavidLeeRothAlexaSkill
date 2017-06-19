@@ -26,12 +26,12 @@ namespace DavidLeeRothAlexaSkill.MiddleWare
 
         public async Task Invoke(HttpContext context)
         {
+            var initialBody = context.Request.Body;
+
             context.Request.EnableRewind();
 
             try
             {
-                await this.next.Invoke(context);
-
                 this.logger.LogInformation("Verifying certificate...");
                 await this.VerifyCertificate(context);
                 this.logger.LogInformation("DONE Verifying certificate.");
@@ -49,6 +49,9 @@ namespace DavidLeeRothAlexaSkill.MiddleWare
                 context.Response.StatusCode = 400;
                 throw;
             }
+
+            await this.next(context);
+            context.Request.Body = initialBody;
         }
 
         private async Task VerifyCertificate(HttpContext context)
