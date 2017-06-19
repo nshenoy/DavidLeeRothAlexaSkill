@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using DavidLeeRothAlexaSkill.Configuration;
+using DavidLeeRothAlexaSkill.Exceptions;
 using DavidLeeRothAlexaSkill.MiddleWare;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -38,11 +39,13 @@ namespace DavidLeeRothAlexaSkill
             services.Configure<AlexaSkillConfiguration>(this.Configuration.GetSection("AlexaSkill"));
 
             // Add framework services.
-            services.AddMvc()
-                .AddJsonOptions(options =>
-                {
-                    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-                });
+            services.AddMvc(mvcOptions =>
+            {
+                mvcOptions.Filters.Add(typeof(JsonExceptionFilter));
+            }).AddJsonOptions(options =>
+            {
+                options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline

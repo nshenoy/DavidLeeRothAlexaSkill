@@ -1,8 +1,8 @@
 ﻿using System;
 using AlexaSkill.Data;
 using DavidLeeRothAlexaSkill.Configuration;
-using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace DavidLeeRothAlexaSkill.Controllers
@@ -51,6 +51,7 @@ namespace DavidLeeRothAlexaSkill.Controllers
         {
             if(request.Session.Application.ApplicationId != this.alexaSkillConfiguration.ApplicationId)
             {
+                this.logger.LogError("Request ApplicationId is incorrect");
                 return BadRequest();
             }
 
