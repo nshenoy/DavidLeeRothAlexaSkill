@@ -60,7 +60,7 @@ namespace DavidLeeRothAlexaSkill
                 RequestPath = new PathString("/Sounds")
             });
 
-            app.UseMiddleware<CertificateRequestValidation>();
+            //app.UseMiddleware<CertificateRequestValidation>();
             app.UseMvc();
         }
     }
