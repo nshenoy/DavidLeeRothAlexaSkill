@@ -15,12 +15,12 @@ namespace DavidLeeRothAlexaSkill.MiddleWare
 {
     public class CertificateRequestValidation
     {
-        private readonly RequestDelegate requestDelegate;
+        private readonly RequestDelegate next;
         private readonly ILogger logger;
 
-        public CertificateRequestValidation(RequestDelegate requestDelegate, ILoggerFactory loggerFactory)
+        public CertificateRequestValidation(RequestDelegate next, ILoggerFactory loggerFactory)
         {
-            this.requestDelegate = requestDelegate;
+            this.next = next;
             this.logger = loggerFactory.CreateLogger("CertificateRequestValidation");
         }
 
@@ -32,8 +32,7 @@ namespace DavidLeeRothAlexaSkill.MiddleWare
             {
                 await this.VerifyCertificate(context);
                 this.logger.LogInformation("Calling requestDelegate.Invoke...");
-                await this.requestDelegate.Invoke(context);
-                this.logger.LogInformation("Complete middleware.");
+                await this.next(context);
             }
             catch (CertificateException ce)
             {
