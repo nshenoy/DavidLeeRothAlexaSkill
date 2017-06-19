@@ -35,13 +35,13 @@ namespace DavidLeeRothAlexaSkill.MiddleWare
                 this.logger.LogInformation("Verifying certificate...");
                 await this.VerifyCertificate(context);
                 this.logger.LogInformation("DONE Verifying certificate.");
+                await this.next(context);
             }
             catch (CertificateException ce)
             {
                 this.logger.LogError(ce.Message, ce);
                 context.Response.StatusCode = 400;
                 await context.Response.WriteAsync(ce.Message);
-                return;
             }
             catch (Exception e)
             {
@@ -49,9 +49,10 @@ namespace DavidLeeRothAlexaSkill.MiddleWare
                 context.Response.StatusCode = 400;
                 throw;
             }
-
-            await this.next(context);
-            context.Request.Body = initialBody;
+            finally
+            {
+                context.Request.Body = initialBody;
+            }
         }
 
         private async Task VerifyCertificate(HttpContext context)
