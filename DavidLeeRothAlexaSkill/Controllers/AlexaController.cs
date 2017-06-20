@@ -59,18 +59,18 @@ namespace DavidLeeRothAlexaSkill.Controllers
         [HttpPost]
         public async Task<IActionResult> GiveMeABottleOfAnythingAndAGlazedDonut([FromBody] AlexaRequest request)
         {
-            try
-            {
-                this.HttpContext.Request.EnableRewind();
-                var initialBody = this.HttpContext.Request.Body;
-                await this.VerifyCertificate(this.HttpContext);
-                this.HttpContext.Request.Body = initialBody;
-            }
-            catch (CertificateException ce)
-            {
-                this.logger.LogError(ce.Message, ce);
-                return BadRequest(ce.Message);
-            }
+            //try
+            //{
+            //    this.HttpContext.Request.EnableRewind();
+            //    var initialBody = this.HttpContext.Request.Body;
+            //    await this.VerifyCertificate(this.HttpContext);
+            //    this.HttpContext.Request.Body = initialBody;
+            //}
+            //catch (CertificateException ce)
+            //{
+            //    this.logger.LogError(ce.Message, ce);
+            //    return BadRequest(ce.Message);
+            //}
 
             if (request.Session.Application.ApplicationId != this.alexaSkillConfiguration.ApplicationId)
             {
