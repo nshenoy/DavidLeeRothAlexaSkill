@@ -26,16 +26,26 @@ namespace DavidLeeRothAlexaSkill.MiddleWare
 
         public async Task Invoke(HttpContext context)
         {
-            var initialBody = context.Request.Body;
-
             context.Request.EnableRewind();
+
+            var initialBody = context.Request.Body;
 
             try
             {
-                this.logger.LogInformation("Verifying certificate...");
-                await this.VerifyCertificate(context);
-                this.logger.LogInformation("DONE Verifying certificate.");
-                await this.next(context);
+                using (var buffer = new MemoryStream())
+                {
+                    await initialBody.CopyToAsync(buffer);
+                    buffer.Position = 0L;
+                    context.Request.Body = buffer;
+
+                    this.logger.LogInformation("Verifying certificate...");
+                    await this.VerifyCertificate(context);
+                    this.logger.LogInformation("DONE Verifying certificate.");
+
+                    context.Request.Body.Position = 0L;
+
+                    await this.next(context);
+                }
             }
             catch (CertificateException ce)
             {
@@ -58,6 +68,10 @@ namespace DavidLeeRothAlexaSkill.MiddleWare
         private async Task VerifyCertificate(HttpContext context)
         {
             var headers = context.Request.Headers;
+
+            var reader = new StreamReader(context.Request.Body, Encoding.UTF8, true, 1024, leaveOpen: true);
+            var body = await reader.ReadToEndAsync();
+            this.logger.LogInformation($"Body: {body}");
 
             if (headers.Keys.Contains("X-IAINTGOTNOBODY"))
             {
@@ -137,9 +151,6 @@ namespace DavidLeeRothAlexaSkill.MiddleWare
 
                 using (var sha1 = new SHA1Managed())
                 {
-                    var reader = new StreamReader(context.Request.Body, Encoding.UTF8, true, 1024, leaveOpen: true);
-                    var body = await reader.ReadToEndAsync();
-                    this.logger.LogInformation($"Body: {body}");
                     var data = sha1.ComputeHash(Encoding.UTF8.GetBytes(body));
 
                     var rsa = (RSACryptoServiceProvider)x509cert.PublicKey.Key;
