@@ -56,7 +56,7 @@ namespace DavidLeeRothAlexaSkill.Controllers
             }
 
             var totalSeconds = (int)((DateTime.UtcNow - request.Request.Timestamp).TotalSeconds);
-            if(totalSeconds < 0 || totalSeconds > 150)
+            if(totalSeconds < -5 || totalSeconds > 150)
             {
                 this.logger.LogError($"Request timestamp is outside the tolerance bounds ({totalSeconds})");
                 return BadRequest($"Request timestamp is outside the tolerance bounds ({totalSeconds})");
