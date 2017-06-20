@@ -1,19 +1,14 @@
 ﻿using System;
 using AlexaSkill.Data;
 using DavidLeeRothAlexaSkill.Configuration;
-using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace DavidLeeRothAlexaSkill.Controllers
 {
     public class DavidLeeRothController : Controller
     {
-        private static string[] RothResponsePrefixes = {
-            "Dave says ",
-            " "
-        };
-
         private static string[] RothResponses = {
             "bopx.mp3",
             "bosdibodiboppx.mp3",
@@ -24,14 +19,6 @@ namespace DavidLeeRothAlexaSkill.Controllers
         };
 
         private static Random GlobalRandom = new Random(Guid.NewGuid().GetHashCode());
-        private string randomRothResponsePrefix
-        {
-            get
-            {
-                var rand = new Random(DavidLeeRothController.GlobalRandom.Next());
-                return DavidLeeRothController.RothResponsePrefixes[rand.Next(0, DavidLeeRothController.RothResponsePrefixes.Length - 1)];
-            }
-        }
 
         private string randomRothResponse
         {
@@ -43,10 +30,12 @@ namespace DavidLeeRothAlexaSkill.Controllers
         }
 
         private AlexaSkillConfiguration alexaSkillConfiguration;
+        private readonly ILogger logger;
 
-        public DavidLeeRothController(IOptions<AlexaSkillConfiguration> alexaSkillConfiguration)
+        public DavidLeeRothController(IOptions<AlexaSkillConfiguration> alexaSkillConfiguration, ILoggerFactory loggerFactory)
         {
             this.alexaSkillConfiguration = alexaSkillConfiguration.Value;
+            this.logger = loggerFactory.CreateLogger("ControllerLogger");
         }
 
         [Route("api/alexa")]
@@ -60,9 +49,17 @@ namespace DavidLeeRothAlexaSkill.Controllers
         [HttpPost]
         public IActionResult GiveMeABottleOfAnythingAndAGlazedDonut([FromBody] AlexaRequest request)
         {
-            if(request.Session.Application.ApplicationId != this.alexaSkillConfiguration.ApplicationId)
+            if (request.Session.Application.ApplicationId != this.alexaSkillConfiguration.ApplicationId)
             {
+                this.logger.LogError("Request ApplicationId is incorrect");
                 return BadRequest();
+            }
+
+            var totalSeconds = (int)((DateTime.UtcNow - request.Request.Timestamp).TotalSeconds);
+            if(totalSeconds < -5 || totalSeconds > 150)
+            {
+                this.logger.LogError($"Request timestamp is outside the tolerance bounds ({totalSeconds})");
+                return BadRequest($"Request timestamp is outside the tolerance bounds ({totalSeconds})");
             }
 
             AlexaResponse response = null;
@@ -95,6 +92,11 @@ namespace DavidLeeRothAlexaSkill.Controllers
                 case "AMAZON.HelpIntent":
                     response = this.HelpIntentHandler(request);
                     break;
+                case "AMAZON.StopIntent":
+                case "AMAZON.CancelIntent":
+                    response = new AlexaResponse("");
+                    response.Response.ShouldEndSession = true;
+                    break;
             }
 
             return response;
@@ -102,7 +104,12 @@ namespace DavidLeeRothAlexaSkill.Controllers
 
         private AlexaResponse HelpIntentHandler(AlexaRequest request)
         {
-            return new AlexaResponse("Ask David Lee Roth to melt your face");
+            var response = new AlexaResponse("The Hair Band skill is here to melt your face. Try asking it to melt your face, to sing, or to say something. What would you like to do?");
+            response.Response.Card.Content = "Awwwww yeah!";
+            response.Response.Reprompt.OutputSpeech.Text = "What would you like me to do?";
+            response.Response.ShouldEndSession = false;
+
+            return response;
         }
 
         private AlexaResponse SayIntentHandler(AlexaRequest request)

@@ -1,33 +1,51 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Threading.Tasks;
 using DavidLeeRothAlexaSkill.Exceptions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.Extensions.Logging;
 
 namespace DavidLeeRothAlexaSkill.MiddleWare
 {
     public class CertificateRequestValidation
     {
-        private readonly RequestDelegate requestDelegate;
+        private readonly RequestDelegate next;
         private readonly ILogger logger;
 
-        public CertificateRequestValidation(RequestDelegate requestDelegate, ILoggerFactory loggerFactory)
+        public CertificateRequestValidation(RequestDelegate next, ILoggerFactory loggerFactory)
         {
-            this.requestDelegate = requestDelegate;
+            this.next = next;
             this.logger = loggerFactory.CreateLogger("CertificateRequestValidation");
         }
 
         public async Task Invoke(HttpContext context)
         {
-            var headers = context.Request.Headers;
+            context.Request.EnableRewind();
+
+            var initialBody = context.Request.Body;
 
             try
             {
-                await this.VerifyCertificate(headers);
-                await this.requestDelegate.Invoke(context);
+                using (var buffer = new MemoryStream())
+                {
+                    await initialBody.CopyToAsync(buffer);
+                    buffer.Position = 0L;
+                    context.Request.Body = buffer;
+
+                    this.logger.LogInformation("Verifying certificate...");
+                    await this.VerifyCertificate(context);
+                    this.logger.LogInformation("DONE Verifying certificate.");
+
+                    context.Request.Body.Position = 0L;
+
+                    await this.next(context);
+                }
             }
             catch (CertificateException ce)
             {
@@ -38,14 +56,26 @@ namespace DavidLeeRothAlexaSkill.MiddleWare
             catch (Exception e)
             {
                 this.logger.LogError(e.Message, e);
+                context.Response.StatusCode = 400;
                 throw;
+            }
+            finally
+            {
+                context.Request.Body = initialBody;
             }
         }
 
-        private async Task VerifyCertificate(IHeaderDictionary headers)
+        private async Task VerifyCertificate(HttpContext context)
         {
-            if(headers.Keys.Contains("X-IAINTGOTNOBODY"))
+            var headers = context.Request.Headers;
+
+            var reader = new StreamReader(context.Request.Body, Encoding.UTF8, true, 1024, leaveOpen: true);
+            var body = await reader.ReadToEndAsync();
+            this.logger.LogInformation($"Body: {body}");
+
+            if (headers.Keys.Contains("X-IAINTGOTNOBODY"))
             {
+                this.logger.LogInformation("X-IAINTGOTNOBODY header found. Skipping certificate validation.");
                 return;
             }
 
@@ -55,7 +85,7 @@ namespace DavidLeeRothAlexaSkill.MiddleWare
                 throw new CertificateException(err);
             }
 
-            var signatureCertChainUrl = headers["SignatureCertChainUrl"].First().Replace("/../", "/");
+            var signatureCertChainUrl = headers["SignatureCertChainUrl"].FirstOrDefault()?.Replace("/../", "/");
 
             if (string.IsNullOrWhiteSpace(signatureCertChainUrl))
             {
@@ -69,12 +99,13 @@ namespace DavidLeeRothAlexaSkill.MiddleWare
                 && certUrl.Host.Equals("s3.amazonaws.com", StringComparison.OrdinalIgnoreCase)
                 && certUrl.AbsolutePath.StartsWith("/echo.api/")))
             {
-                string err = "`SignatureCertChainUrl` is invalid";
+                string err = $"`SignatureCertChainUrl` is invalid [{signatureCertChainUrl}]";
                 throw new CertificateException(err);
             }
 
             using (var client = new HttpClient())
             {
+                this.logger.LogInformation($"Attempting to download cert from {certUrl}...");
                 var cert = await client.GetByteArrayAsync(certUrl);
                 var x509cert = new X509Certificate2(cert);
                 var effectiveDate = DateTime.MinValue;
@@ -109,6 +140,36 @@ namespace DavidLeeRothAlexaSkill.MiddleWare
                     string err = "Certificate chain is not valid";
                     throw new CertificateException(err);
                 }
+
+                this.logger.LogInformation("Attempting to validate Signature hash...");
+
+                var signatureHeaderValue = headers["Signature"].First();
+
+                this.logger.LogInformation($"Signature value: {signatureHeaderValue}");
+
+                var signature = Convert.FromBase64String(signatureHeaderValue);
+
+                using (var sha1 = new SHA1Managed())
+                {
+                    var data = sha1.ComputeHash(Encoding.UTF8.GetBytes(body));
+
+                    var rsa = (RSACryptoServiceProvider)x509cert.PublicKey.Key;
+
+                    if(rsa == null)
+                    {
+                        string err = "Certificate public key is null";
+                        throw new CertificateException(err);
+                    }
+
+                    this.logger.LogInformation("Verifying hash...");
+                    if(!rsa.VerifyHash(data, CryptoConfig.MapNameToOID("SHA1"), signature))
+                    {
+                        string err = "Asserted hash value from `Signature` header does not match derived hash value from the request body";
+                        throw new CertificateException(err);
+                    }
+                    this.logger.LogInformation("Done validating certificate!");
+                }
+
             }
         }
     }
