@@ -4,7 +4,7 @@
 The most hard core Alexa skill that has the power to blow people's mind with high voltage rock. A skill so hard core that it could only be built using ASPNET Core. \m/ 
  
 
-<i><sub>Yeah, it's actually kind of lame.</sub></i>
+<i>Yeah, it's actually kind of lame.</i>
 
 This is basically a sample application for building an ASPNET Core API Alexa Skill that responds with a random sound clip from an 80s [hair band](https://en.wikipedia.org/wiki/Glam_metal).
 
