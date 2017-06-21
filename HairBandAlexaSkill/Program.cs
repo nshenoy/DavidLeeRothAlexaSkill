@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 
-namespace DavidLeeRothAlexaSkill
+namespace HairBandAlexaSkill
 {
     public class Program
     {

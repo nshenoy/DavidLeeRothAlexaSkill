@@ -1,7 +1,7 @@
 ﻿using System.IO;
-using DavidLeeRothAlexaSkill.Configuration;
-using DavidLeeRothAlexaSkill.Exceptions;
-using DavidLeeRothAlexaSkill.MiddleWare;
+using HairBandAlexaSkill.Configuration;
+using HairBandAlexaSkill.Exceptions;
+using HairBandAlexaSkill.MiddleWare;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -11,7 +11,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
 
-namespace DavidLeeRothAlexaSkill
+namespace HairBandAlexaSkill
 {
     public class Startup
     {
@@ -61,7 +61,7 @@ namespace DavidLeeRothAlexaSkill
                 RequestPath = new PathString("/Sounds")
             });
 
-            app.UseMiddleware<CertificateRequestValidation>();
+            app.UseCertificateRequestValidation();
 
             app.UseMvc();
         }

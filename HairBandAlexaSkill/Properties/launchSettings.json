@@ -16,7 +16,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "DavidLeeRothAlexaSkill": {
+    "HairBandAlexaSkill": {
       "commandName": "Project",
       "launchBrowser": true,
       "launchUrl": "api/alexa",

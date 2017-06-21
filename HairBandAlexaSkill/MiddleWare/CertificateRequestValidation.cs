@@ -6,12 +6,13 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
-using DavidLeeRothAlexaSkill.Exceptions;
+using HairBandAlexaSkill.Exceptions;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Internal;
 using Microsoft.Extensions.Logging;
 
-namespace DavidLeeRothAlexaSkill.MiddleWare
+namespace HairBandAlexaSkill.MiddleWare
 {
     public class CertificateRequestValidation
     {
@@ -171,6 +172,14 @@ namespace DavidLeeRothAlexaSkill.MiddleWare
                 }
 
             }
+        }
+    }
+
+    public static class CertificateRequestValidationExtensions
+    {
+        public static IApplicationBuilder UseCertificateRequestValidation(this IApplicationBuilder builder)
+        {
+            return builder.UseMiddleware<CertificateRequestValidation>();
         }
     }
 }
