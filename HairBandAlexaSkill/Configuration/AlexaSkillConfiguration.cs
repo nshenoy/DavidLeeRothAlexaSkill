@@ -1,4 +1,4 @@
-﻿namespace DavidLeeRothAlexaSkill.Configuration
+﻿namespace HairBandAlexaSkill.Configuration
 {
     public class AlexaSkillConfiguration
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DavidLeeRothAlexaSkill.Exceptions
+namespace HairBandAlexaSkill.Exceptions
 {
     public class CertificateException : Exception
     {

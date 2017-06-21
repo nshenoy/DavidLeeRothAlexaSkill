@@ -1,13 +1,13 @@
 ﻿using System;
 using AlexaSkill.Data;
-using DavidLeeRothAlexaSkill.Configuration;
+using HairBandAlexaSkill.Configuration;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace DavidLeeRothAlexaSkill.Controllers
+namespace HairBandAlexaSkill.Controllers
 {
-    public class DavidLeeRothController : Controller
+    public class HairBandController : Controller
     {
         private static string[] RothResponses = {
             "bopx.mp3",
@@ -24,15 +24,15 @@ namespace DavidLeeRothAlexaSkill.Controllers
         {
             get
             {
-                var rand = new Random(DavidLeeRothController.GlobalRandom.Next());
-                return DavidLeeRothController.RothResponses[rand.Next(0, DavidLeeRothController.RothResponses.Length - 1)];
+                var rand = new Random(HairBandController.GlobalRandom.Next());
+                return HairBandController.RothResponses[rand.Next(0, HairBandController.RothResponses.Length - 1)];
             }
         }
 
         private AlexaSkillConfiguration alexaSkillConfiguration;
         private readonly ILogger logger;
 
-        public DavidLeeRothController(IOptions<AlexaSkillConfiguration> alexaSkillConfiguration, ILoggerFactory loggerFactory)
+        public HairBandController(IOptions<AlexaSkillConfiguration> alexaSkillConfiguration, ILoggerFactory loggerFactory)
         {
             this.alexaSkillConfiguration = alexaSkillConfiguration.Value;
             this.logger = loggerFactory.CreateLogger("ControllerLogger");

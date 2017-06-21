@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
 
-namespace DavidLeeRothAlexaSkill.Exceptions
+namespace HairBandAlexaSkill.Exceptions
 {
     public class JsonExceptionFilter : IExceptionFilter
     {

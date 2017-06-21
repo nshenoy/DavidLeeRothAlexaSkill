@@ -3,6 +3,8 @@
   <PropertyGroup>
     <TargetFramework>net461</TargetFramework>
     <PackageTargetFallback>portable-net45+win8</PackageTargetFallback>
+    <AssemblyName>HairBandAlexaSkill</AssemblyName>
+    <RootNamespace>HairBandAlexaSkill</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <None Update="wwwroot\**\*">
